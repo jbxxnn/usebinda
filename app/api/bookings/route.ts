@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { validateBookingData } from '@/lib/validation';
+import { generateAccessToken, generateTokenExpiration } from '@/lib/booking-tokens';
 import type { ApiResponse } from '@/lib/types';
 
 /**
@@ -36,6 +37,10 @@ export async function POST(request: NextRequest) {
     // Create booking using service role (bypasses RLS)
     const supabase = createAdminClient();
     
+    // Generate access token for guest booking management
+    const accessToken = generateAccessToken();
+    const tokenExpiration = generateTokenExpiration();
+
     const { data: booking, error: insertError } = await supabase
       .from('bookings')
       .insert({
@@ -51,6 +56,9 @@ export async function POST(request: NextRequest) {
         notes: body.notes || null,
         status: 'pending',
         payment_status: 'unpaid',
+        access_token: accessToken,
+        token_expires_at: tokenExpiration.toISOString(),
+        reschedule_count: 0,
       })
       .select()
       .single();
@@ -63,8 +71,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Get provider username for management URL
+    const { data: provider } = await supabase
+      .from('users')
+      .select('username')
+      .eq('id', body.provider_id)
+      .single();
+
+    const managementUrl = `/${provider?.username || 'provider'}/booking/${booking.id}?token=${accessToken}`;
+
+    // TODO: Send confirmation email with booking management link
+
     return NextResponse.json<ApiResponse>(
-      { success: true, data: booking },
+      { 
+        success: true, 
+        data: {
+          ...booking,
+          access_token: accessToken, // Include token for immediate access
+          management_url: managementUrl
+        }
+      },
       { status: 201 }
     );
   } catch (error) {

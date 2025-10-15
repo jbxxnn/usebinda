@@ -50,6 +50,12 @@ export interface Booking {
   notes: string | null;
   status: BookingStatus;
   payment_status: PaymentStatus;
+  access_token: string | null;
+  token_expires_at: string | null;
+  cancellation_reason: string | null;
+  cancelled_at: string | null;
+  rescheduled_from_booking_id: string | null;
+  reschedule_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -102,8 +108,36 @@ export interface AvailabilitySettings {
   max_bookings_per_slot: number;
   min_advance_booking_hours: number;
   max_advance_booking_days: number;
+  cancellation_policy: CancellationPolicy;
+  rescheduling_policy: ReschedulingPolicy;
+  notification_preferences: NotificationPreferences;
   created_at: string;
   updated_at: string;
+}
+
+export interface CancellationPolicy {
+  free_cancellation_hours: number;
+  partial_refund_hours: number;
+  no_refund_hours: number;
+  partial_refund_percentage: number;
+  allow_provider_cancellation: boolean;
+}
+
+export interface ReschedulingPolicy {
+  free_rescheduling_hours: number;
+  rescheduling_fee_hours: number;
+  rescheduling_fee_amount: number;
+  max_reschedules_per_booking: number;
+  allow_provider_rescheduling: boolean;
+}
+
+export interface NotificationPreferences {
+  send_sms_cancellations: boolean;
+  send_email_cancellations: boolean;
+  send_sms_reschedules: boolean;
+  send_email_reschedules: boolean;
+  notify_provider_on_cancellation: boolean;
+  notify_provider_on_reschedule: boolean;
 }
 
 export type BlockType = 'manual' | 'holiday' | 'vacation' | 'maintenance';

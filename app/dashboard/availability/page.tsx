@@ -29,6 +29,28 @@ export default async function AvailabilityPage() {
       max_bookings_per_slot: 1,
       min_advance_booking_hours: 2,
       max_advance_booking_days: 30,
+      cancellation_policy: {
+        free_cancellation_hours: 24,
+        partial_refund_hours: 2,
+        no_refund_hours: 0,
+        partial_refund_percentage: 50,
+        allow_provider_cancellation: true,
+      },
+      rescheduling_policy: {
+        free_rescheduling_hours: 24,
+        rescheduling_fee_hours: 2,
+        rescheduling_fee_amount: 0,
+        max_reschedules_per_booking: 3,
+        allow_provider_rescheduling: true,
+      },
+      notification_preferences: {
+        send_sms_cancellations: true,
+        send_email_cancellations: true,
+        send_sms_reschedules: true,
+        send_email_reschedules: true,
+        notify_provider_on_cancellation: true,
+        notify_provider_on_reschedule: true,
+      },
       created_at: '',
       updated_at: '',
     };

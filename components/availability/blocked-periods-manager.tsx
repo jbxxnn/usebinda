@@ -329,8 +329,8 @@ export function BlockedPeriodsManager() {
         </p>
         <ul className="list-disc list-inside mt-1 space-y-1">
           <li>Use the quick buttons to automatically set full-day blocks (12:00 AM - 11:59 PM)</li>
-          <li>For single day: Select start date, click "Single Day" button</li>
-          <li>For date ranges: Select both dates, click "Date Range" button</li>
+          <li>For single day: Select start date, click &quot;Single Day&quot; button</li>
+          <li>For date ranges: Select both dates, click &quot;Date Range&quot; button</li>
         </ul>
         
         <p className="mt-3">

@@ -15,6 +15,7 @@ import { WorkingHoursEditor } from './working-hours-editor';
 import { BreakTimesEditor } from './break-times-editor';
 import { BlockedPeriodsManager } from './blocked-periods-manager';
 import { AvailabilitySettingsPanel } from './availability-settings-panel';
+import { BookingPoliciesEditor } from './booking-policies-editor';
 
 interface AvailabilityManagementProps {
   initialSettings: AvailabilitySettings;
@@ -130,6 +131,15 @@ export function AvailabilityManagement({ initialSettings }: AvailabilityManageme
           settings={settings} 
           onChange={handleSettingsChange} 
         />
+      </Card>
+
+      {/* Booking Policies */}
+      <Card className="p-6">
+        <h2 className="text-xl font-semibold mb-4">Booking Policies</h2>
+        <p className="text-sm text-muted-foreground mb-6">
+          Set cancellation, rescheduling, and notification policies
+        </p>
+        <BookingPoliciesEditor />
       </Card>
 
       {/* Save Button */}
