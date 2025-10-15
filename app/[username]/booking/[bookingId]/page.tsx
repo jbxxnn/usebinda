@@ -1,6 +1,8 @@
 // Guest booking management page
 
-import { notFound, redirect } from 'next/navigation';
+import { notFound, 
+  // redirect 
+} from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { BookingManagement } from '@/components/booking/booking-management';
 
@@ -18,7 +20,9 @@ export default async function BookingManagementPage({
   params, 
   searchParams 
 }: BookingManagementPageProps) {
-  const { username, bookingId } = params;
+  const { 
+    // username, 
+    bookingId } = params;
   const { token } = searchParams;
 
   // Validate token

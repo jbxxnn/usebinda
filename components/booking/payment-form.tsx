@@ -14,9 +14,10 @@ interface PaymentFormProps {
   booking: BookingWithDetails;
   service: Service;
   provider: User;
+  managementUrl?: string;
 }
 
-export function PaymentForm({ booking, service, provider }: PaymentFormProps) {
+export function PaymentForm({ booking, service, provider, managementUrl }: PaymentFormProps) {
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -110,6 +111,21 @@ export function PaymentForm({ booking, service, provider }: PaymentFormProps) {
           <p className="text-xs text-center text-muted-foreground">
             By completing payment, you agree to our terms of service.
           </p>
+
+          {managementUrl && (
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h3 className="font-medium text-blue-900 mb-2">Manage Your Booking</h3>
+              <p className="text-sm text-blue-800 mb-3">
+                Save this link to cancel or reschedule your appointment:
+              </p>
+              <div className="bg-white p-2 rounded border text-xs font-mono text-blue-900 break-all">
+                {typeof window !== 'undefined' ? window.location.origin : ''}{managementUrl}
+              </div>
+              <p className="text-xs text-blue-700 mt-2">
+                💡 This link will be sent to your email after payment confirmation
+              </p>
+            </div>
+          )}
         </div>
       </Card>
     </div>

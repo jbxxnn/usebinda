@@ -38,6 +38,11 @@ export default async function PaymentPage({ params, searchParams }: PageProps) {
     notFound();
   }
 
+  // Generate management URL if booking has access token
+  const managementUrl = booking.access_token 
+    ? `/${username}/booking/${bookingId}?token=${booking.access_token}`
+    : undefined;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -67,6 +72,7 @@ export default async function PaymentPage({ params, searchParams }: PageProps) {
           booking={booking}
           service={service}
           provider={provider}
+          managementUrl={managementUrl}
         />
       </main>
     </div>

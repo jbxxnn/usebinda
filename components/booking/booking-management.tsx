@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatAmount } from '@/lib/stripe';
 import { formatDate, formatTime } from '@/lib/scheduling';
+import { RescheduleForm } from './reschedule-form';
 
 interface BookingManagementProps {
   booking: Booking & {
@@ -28,6 +29,7 @@ export function BookingManagement({ booking, policies, accessToken }: BookingMan
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showCancelForm, setShowCancelForm] = useState(false);
+  const [showRescheduleForm, setShowRescheduleForm] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
 
   const appointmentDate = new Date(booking.date_time);
@@ -254,10 +256,7 @@ export function BookingManagement({ booking, policies, accessToken }: BookingMan
             {canReschedule && (
               <Button
                 variant="outline"
-                onClick={() => {
-                  // TODO: Implement rescheduling
-                  setError('Rescheduling feature coming soon!');
-                }}
+                onClick={() => setShowRescheduleForm(true)}
                 disabled={isLoading}
               >
                 Reschedule Booking
@@ -319,6 +318,25 @@ export function BookingManagement({ booking, policies, accessToken }: BookingMan
             </div>
           </div>
         </Card>
+      )}
+
+      {/* Reschedule Form */}
+      {showRescheduleForm && (
+        <RescheduleForm
+          booking={booking}
+          policies={policies}
+          accessToken={accessToken}
+          onSuccess={() => {
+            setSuccess('Booking rescheduled successfully!');
+            setShowRescheduleForm(false);
+            // Refresh the page to show updated booking
+            setTimeout(() => window.location.reload(), 2000);
+          }}
+          onCancel={() => {
+            setShowRescheduleForm(false);
+            setError('');
+          }}
+        />
       )}
 
       {/* Messages */}

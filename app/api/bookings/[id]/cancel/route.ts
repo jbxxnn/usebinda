@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import type { ApiResponse } from '@/lib/types';
-import { generateAccessToken } from '@/lib/booking-tokens';
+// import { generateAccessToken } from '@/lib/booking-tokens';
 
 /**
  * PUT /api/bookings/[id]/cancel

@@ -98,7 +98,7 @@ export function BookingPoliciesEditor() {
     }
   };
 
-  const updateCancellationPolicy = (field: keyof CancellationPolicy, value: any) => {
+  const updateCancellationPolicy = (field: keyof CancellationPolicy, value: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     setPolicies(prev => ({
       ...prev,
       cancellation_policy: {
@@ -108,7 +108,7 @@ export function BookingPoliciesEditor() {
     }));
   };
 
-  const updateReschedulingPolicy = (field: keyof ReschedulingPolicy, value: any) => {
+  const updateReschedulingPolicy = (field: keyof ReschedulingPolicy, value: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     setPolicies(prev => ({
       ...prev,
       rescheduling_policy: {
