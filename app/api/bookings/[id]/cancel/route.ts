@@ -11,10 +11,10 @@ import type { ApiResponse } from '@/lib/types';
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const bookingId = params.id;
+    const { id: bookingId } = await params;
     const body = await request.json();
     const { reason, token, cancelled_by } = body; // 'customer' or 'provider'
 
