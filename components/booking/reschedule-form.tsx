@@ -5,13 +5,13 @@
 import { useState, useEffect } from 'react';
 import type { Service, User } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+// import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
-import { Badge } from '@/components/ui/badge';
+// import { Badge } from '@/components/ui/badge';
 import { formatDate, formatTime } from '@/lib/scheduling';
-import { addDays, isSameDay, isToday, isPast } from 'date-fns';
+import { isSameDay, isToday, isPast } from 'date-fns';
 
 interface RescheduleFormProps {
   booking: {

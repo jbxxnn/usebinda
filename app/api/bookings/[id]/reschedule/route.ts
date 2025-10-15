@@ -10,7 +10,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   try {
     const bookingId = params.id;
     const body = await request.json();
-    const { new_date_time, reason, token } = body;
+    const { new_date_time, 
+      // reason, 
+      token } = body;
 
     if (!token) {
       return NextResponse.json<ApiResponse>(
