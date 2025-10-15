@@ -101,7 +101,7 @@ export function WorkingHoursEditor({ workingHours, onChange }: WorkingHoursEdito
           <Checkbox 
             id="copy-to-all"
             checked={copyToAll}
-            onCheckedChange={setCopyToAll}
+            onCheckedChange={(checked) => setCopyToAll(checked as boolean)}
           />
           <Label htmlFor="copy-to-all" className="text-sm">
             Copy Monday to all days
