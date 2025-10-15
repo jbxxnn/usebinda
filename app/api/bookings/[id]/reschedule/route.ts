@@ -6,9 +6,9 @@ import type { ApiResponse, Booking } from '@/lib/types';
  * PUT /api/bookings/[id]/reschedule
  * Reschedule a booking using an access token (for guest users)
  */
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const bookingId = params.id;
+    const { id: bookingId } = await params;
     const body = await request.json();
     const { new_date_time, 
       // reason, 
