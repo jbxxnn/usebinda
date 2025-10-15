@@ -7,13 +7,13 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { BookingManagement } from '@/components/booking/booking-management';
 
 interface BookingManagementPageProps {
-  params: {
+  params: Promise<{
     username: string;
     bookingId: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     token?: string;
-  };
+  }>;
 }
 
 export default async function BookingManagementPage({ 
@@ -22,8 +22,8 @@ export default async function BookingManagementPage({
 }: BookingManagementPageProps) {
   const { 
     // username, 
-    bookingId } = params;
-  const { token } = searchParams;
+    bookingId } = await params;
+  const { token } = await searchParams;
 
   // Validate token
   if (!token) {
