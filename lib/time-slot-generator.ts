@@ -6,7 +6,7 @@ import type {
   BlockedPeriod,
   Service,
   TimeSlot,
-  WorkingHours,
+  // WorkingHours,
   BreakTime,
 } from './types';
 import { createAdminClient } from './supabase/admin';
@@ -26,7 +26,7 @@ export async function generateTimeSlots(
   providerId: string,
   serviceId: string,
   date: Date,
-  timezone: string = 'America/New_York'
+  // timezone: string = 'America/New_York'
 ): Promise<TimeSlot[]> {
   console.log('=== Time Slot Generation Debug ===');
   console.log('Provider ID:', providerId);
@@ -153,7 +153,7 @@ function generateSlotsForDay(
 
   // Generate slots at 15-minute intervals (configurable)
   const slotInterval = 15; // minutes
-  let currentTime = new Date(dayStart);
+  const currentTime = new Date(dayStart);
 
   console.log('Starting slot generation:', {
     dayStart: dayStart.toISOString(),
@@ -329,7 +329,7 @@ function countBookingsAtTime(
 /**
  * Check if a date is within the bookable window
  */
-function isDateBookable(date: Date, settings: AvailabilitySettings): boolean {
+function isDateBookable(date: Date, settings: AvailabilitySettings): boolean { // eslint-disable-line @typescript-eslint/no-unused-vars
   const now = new Date();
   
   // TEMPORARY: Relax advance booking rules for testing
@@ -555,7 +555,7 @@ export async function getAvailableDates(
     
     if (dayHours && dayHours.enabled && isDateBookable(date, settings)) {
       // Check if there's at least one available slot
-      const slots = await generateTimeSlots(providerId, serviceId, date, settings.timezone);
+      const slots = await generateTimeSlots(providerId, serviceId, date); //, settings.timezone);
       const hasAvailableSlots = slots.some(slot => slot.available);
       
       if (hasAvailableSlots) {

@@ -3,13 +3,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getAvailabilitySettings, upsertAvailabilitySettings } from '@/lib/availability';
-import type { ApiResponse, AvailabilitySettings } from '@/lib/types';
+import type { ApiResponse, 
+  // AvailabilitySettings 
+} from '@/lib/types';
 
 /**
  * GET /api/availability
  * Get availability settings for the authenticated provider
  */
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest) { // eslint-disable-line @typescript-eslint/no-unused-vars
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();

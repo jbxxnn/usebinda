@@ -2,12 +2,14 @@
 
 // Availability management component
 
-import { useState, useEffect } from 'react';
+import { useState, 
+  // useEffect 
+} from 'react';
 import { useRouter } from 'next/navigation';
 import type { AvailabilitySettings, WorkingHours, BreakTime } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+// import { Input } from '@/components/ui/input';
+// import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { WorkingHoursEditor } from './working-hours-editor';
 import { BreakTimesEditor } from './break-times-editor';
@@ -101,7 +103,7 @@ export function AvailabilityManagement({ initialSettings }: AvailabilityManageme
       <Card className="p-6">
         <h2 className="text-xl font-semibold mb-4">Break Times</h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Add break periods when you're not available (lunch, coffee breaks, etc.)
+          Add break periods when you&apos;re not available (lunch, coffee breaks, etc.)
         </p>
         <BreakTimesEditor 
           breakTimes={breakTimes} 

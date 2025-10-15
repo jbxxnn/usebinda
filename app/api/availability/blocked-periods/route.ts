@@ -3,7 +3,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getBlockedPeriods, createBlockedPeriod } from '@/lib/availability';
-import type { ApiResponse, BlockedPeriod } from '@/lib/types';
+import type { ApiResponse, 
+  // BlockedPeriod 
+} from '@/lib/types';
 
 /**
  * GET /api/availability/blocked-periods

@@ -117,7 +117,7 @@ export interface BlockedPeriod {
   title: string;
   description: string | null;
   is_recurring: boolean;
-  recurrence_pattern: any | null;
+  recurrence_pattern: any | null; // eslint-disable-line @typescript-eslint/no-explicit-any
   created_at: string;
   updated_at: string;
 }
