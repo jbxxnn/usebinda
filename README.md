@@ -1,109 +1,330 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# 🇺🇸 Binda — The Solo Home-Service Operator’s OS
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+**Tagline:** “Get booked, get paid, get rebooked — all from your phone.”
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+Binda is a lightweight SaaS for **independent home-service professionals** in the United States — cleaners, handymen, mobile detailers, and repair pros — who are tired of juggling calls, texts, and cash payments.
 
-## Features
+We help them:
+- Accept online bookings
+- Collect deposits and payments automatically
+- Reduce no-shows with automated reminders
+- Rebook repeat customers in one tap
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+Built for the solo operator, not the enterprise.
 
-## Demo
+---
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+## 🚀 Overview
 
-## Deploy to Vercel
+### Problem
+In the U.S., over **6 million home-service professionals** run on text messages, Google Calendar, and luck. They lose time, forget appointments, and eat costs from no-shows.
 
-Vercel deployment will guide you through creating a Supabase account and project.
+Existing tools fail them:
+- **Calendly**: too generic (for meetings, not jobs)
+- **Housecall Pro / Jobber**: too complex and expensive
+- **Square Appointments**: salon-focused, not mobile trades
+- **Thumbtack / Angi**: marketplaces that *own the customer*
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+### Solution
+Binda gives pros their own booking link, automates payments and reminders, and runs entirely from a phone.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+> “It’s like Calendly met Stripe and Twilio, had a kid, and raised it to fix your scheduling chaos.”
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+---
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+## 🧩 Core MVP (Day-1 Scope)
 
-## Clone and run locally
+| Feature | Description | Status |
+|----------|--------------|--------|
+| **Public Booking Page** | `binda.app/username` with service list, durations, travel buffer, ZIP filtering | ✅ MVP |
+| **Smart Scheduling Engine** | Prevent double bookings, block travel time, handle time zones | ✅ MVP |
+| **Deposits & Payments** | Stripe integration (cards, Apple Pay, Google Pay) | ✅ MVP |
+| **SMS Workflow** | Confirmations, reminders, “On my way” messages (TCPA-compliant) | ✅ MVP |
+| **Receipts & Invoices** | Auto-generated PDF receipts with tax & tips | ✅ MVP |
+| **Rebook Loop** | Post-job SMS with “Book again in 2/4 weeks” | ✅ MVP |
+| **Analytics** | Basic dashboard: jobs/week, revenue, no-show rate | ✅ MVP |
+| **10-min Setup Flow** | Provider to first booking under 10 minutes | ✅ KPI |
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+---
 
-2. Create a Next.js app using the Supabase Starter template npx command
+## 🧱 Tech Stack
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+| Layer | Technology | Reason |
+|-------|-------------|--------|
+| **Frontend** | Next.js 15 + React + TailwindCSS | Modern, scalable, mobile-friendly |
+| **Backend / DB** | Supabase (Postgres + Auth + Storage) | Fast setup, managed Postgres, RLS |
+| **Payments** | Stripe (U.S. only) | Reliable, Apple Pay & card-on-file support |
+| **Messaging** | Twilio SMS (10DLC registered) + Resend (email fallback) | TCPA-safe communication |
+| **Hosting** | Vercel | Zero-config deployment |
+| **PDF & Files** | React-PDF + Supabase Storage | Receipts, invoices |
+| **Analytics** | PostHog | Activation + retention funnels |
+| **Monitoring** | Sentry | Error tracking |
+| **CI/CD** | GitHub Actions | Test + deploy automation |
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+---
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+## 🧮 Core Database Schema
 
-3. Use `cd` to change into the app's directory
+### `users`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID | Primary key |
+| name | text | Provider’s full name |
+| email | text | Login |
+| phone | text | SMS number (A2P verified) |
+| role | enum('provider','customer') | Role type |
+| created_at | timestamp | Auto |
+| stripe_customer_id | text | Stripe reference |
 
-   ```bash
-   cd with-supabase-app
-   ```
+### `services`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID | Primary key |
+| user_id | UUID | Provider |
+| title | text | e.g., “2-Hour Cleaning” |
+| price | numeric | e.g., 100.00 |
+| duration | integer | Minutes |
+| buffer_minutes | integer | Travel buffer |
+| active | boolean | Default true |
 
-4. Rename `.env.example` to `.env.local` and update the following:
+### `bookings`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID | Primary key |
+| service_id | UUID | FK |
+| customer_id | UUID | FK |
+| date_time | timestamp | Appointment start |
+| address | text | Job location |
+| notes | text | Optional |
+| status | enum('pending','confirmed','completed','cancelled') | Job status |
+| payment_status | enum('unpaid','deposit','paid','refunded') | |
+| policy_id | UUID | Linked policy |
 
-  ```env
-  NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=[INSERT SUPABASE PROJECT API PUBLISHABLE OR ANON KEY]
-  ```
-  > [!NOTE]
-  > This example uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, which refers to Supabase's new **publishable** key format.
-  > Both legacy **anon** keys and new **publishable** keys can be used with this variable name during the transition period. Supabase's dashboard may show `NEXT_PUBLIC_SUPABASE_ANON_KEY`; its value can be used in this example.
-  > See the [full announcement](https://github.com/orgs/supabase/discussions/29260) for more information.
+### `payments`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID | Primary key |
+| booking_id | UUID | FK |
+| amount | numeric | In USD |
+| status | enum('pending','succeeded','failed') | Stripe status |
+| transaction_id | text | Stripe PaymentIntent ID |
 
-  Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
+### `messages`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | UUID | Primary key |
+| booking_id | UUID | FK |
+| type | enum('confirmation','reminder','rebook','review') | Message type |
+| channel | enum('sms','email') | |
+| sent_at | timestamp | Auto |
 
-5. You can now run the Next.js local development server:
+---
 
-   ```bash
-   npm run dev
-   ```
+## 🧠 Key Design Principles
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+1. **Mobile-first everything** — usable entirely from a phone.  
+2. **Ten-minute value** — provider publishes link + first booking fast.  
+3. **No jargon** — “Job,” not “event.” “Customer,” not “lead.”  
+4. **SMS-native UX** — America doesn’t use WhatsApp for business.  
+5. **Lean tech** — avoid microservices, stick to boring stack.  
+6. **Trust by transparency** — clear pricing, no lock-in, data export any time.  
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+---
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+## 🧾 Pricing
 
-## Feedback and issues
+| Tier | Price | Designed For | Key Features |
+|------|--------|---------------|---------------|
+| **Free** | $0 | New solos | 10 bookings/mo, Binda branding, deposits |
+| **Starter** | $19/mo | Active operators | Unlimited bookings, no-show automation, rebook SMS |
+| **Pro** | $39/mo | Growth stage | Card-on-file, add-ons, reports, branding, review booster |
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+**Payments:** Standard Stripe fees (2.9% + 30¢).  
+Optional $0.50 per-booking fee on Free tier.
 
-## More Supabase examples
+---
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+## ⚙️ Product Roadmap (90 Days)
+
+### **Phase 1 — Ship the Spine (0–30 days)**
+- Build booking engine (services, slots, customers, payments)
+- Implement Twilio + Stripe integration
+- Deploy on Vercel + Supabase
+- Internal smoke test flow: signup → publish → book → pay → receipt
+
+### **Phase 2 — Monetize & Retain (31–60 days)**
+- Add deposits, no-show automation, and review booster
+- Launch first paid tier ($19/mo)
+- Track metrics: activation (publish link), first booking, payment success
+
+### **Phase 3 — GTM & Case Studies (61–90 days)**
+- Target **Cleaners + Handymen** first
+- Launch pilots in **Phoenix, Dallas, Tampa**
+- Collect testimonials and 10 early case studies
+- Optimize conversion funnel: trial → paid
+
+---
+
+## 📈 KPIs
+
+| Metric | Target |
+|--------|--------|
+| Activation (publish link + 1 booking <48h) | ≥ 40% |
+| No-show reduction | -30% vs baseline |
+| WAU/MAU | ≥ 45% |
+| Free → Paid conversion | 8–12% |
+| CSAT | ≥ 4.6 / 5 |
+| NPS | ≥ 40 |
+| Churn (month 6) | ≤ 5% |
+
+---
+
+## 🔒 Compliance & Legal
+
+- **SMS Compliance:** TCPA/CTIA 10DLC registered; opt-in/out logic required.  
+- **Payments:** PCI-DSS handled via Stripe.  
+- **Data Privacy:** No sale of customer data; encrypted at rest.  
+- **Accessibility:** WCAG 2.1 AA responsive interface.  
+- **Tax:** Automated sales tax collection (Stripe Tax optional).  
+
+---
+
+## 🧭 Go-To-Market Strategy
+
+### Channels
+1. **YouTube & TikTok creators** (cleaning business, handyman coaches) — affiliate 20% revenue share.  
+2. **Facebook Groups** — “House Cleaning Tips,” “Handyman Pros USA” seeding posts with ROI examples.  
+3. **Google Ads** — long-tail: “handyman booking app,” “reduce no-shows cleaning.”  
+4. **SEO & content** — “Best booking apps for small cleaning business.”  
+5. **Tool rental stores / supply shops** — flyers + QR sign-up.
+
+### Messaging Example
+> “Two missed jobs a month? That’s $300 gone.  
+> Binda fixes that for $19.”
+
+### Retention Levers
+- Feature-gated upsells (review booster, card-on-file)  
+- Pause plan (keep data free)  
+- SMS fee credits for milestones (e.g., 20 reviews)  
+- Quarterly “Playbooks” email — how top pros use Binda
+
+---
+
+## 🧠 Risk & Mitigation
+
+| Risk | Mitigation |
+|------|-------------|
+| SMS spam complaints | Strict opt-in, quiet hours, STOP keyword, registered 10DLC |
+| Chargebacks | Preauth deposits, clear cancellation policy, Stripe evidence packet |
+| Feature bloat | Ship guardrails, enforce “10-min setup” rule |
+| Seasonality churn | Pause subscription feature |
+| Integration creep | Maintain 1-core-integration-per-function (Stripe, Twilio, Supabase) |
+
+---
+
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+A[Customer Booking Page] --> B[Booking API]
+B --> C[(Supabase DB)]
+B --> D[Stripe Checkout]
+D --> C
+B --> E[Twilio SMS Service]
+E --> C
+F[Provider Dashboard] --> C
+F --> B
+
+🧰 Developer Setup
+Prerequisites
+
+Node.js 18+
+
+npm / yarn
+
+Supabase project
+
+Stripe + Twilio test keys
+
+Install & Run
+
+git clone https://github.com/yourusername/binda.git
+cd binda
+npm install
+cp .env.example .env.local
+# Fill with Supabase, Stripe, Twilio keys
+npm run dev
+
+Environment Variables
+
+| Key                           | Description            |
+| ----------------------------- | ---------------------- |
+| NEXT_PUBLIC_SUPABASE_URL      | Supabase project URL   |
+| NEXT_PUBLIC_SUPABASE_ANON_KEY | Supabase anon key      |
+| STRIPE_SECRET_KEY             | Stripe key             |
+| TWILIO_ACCOUNT_SID            | Twilio account SID     |
+| TWILIO_AUTH_TOKEN             | Twilio auth token      |
+| TWILIO_PHONE                  | Verified A2P number    |
+| RESEND_API_KEY                | Email fallback         |
+| POSTHOG_API_KEY               | Analytics key          |
+| BASE_URL                      | App URL (for webhooks) |
+
+
+🧩 Folder Structure
+
+/binda
+ ├── /app
+ │   ├── (public) booking pages
+ │   ├── dashboard/
+ │   └── api/ (server actions)
+ ├── /components
+ ├── /lib
+ │   ├── supabase.ts
+ │   ├── stripe.ts
+ │   ├── twilio.ts
+ │   └── utils.ts
+ ├── /styles
+ ├── /tests
+ ├── README.md
+ ├── .env.example
+ ├── next.config.js
+ └── package.json
+
+
+🤝 Team Workflow
+
+PM/Founder — sets KPIs, handles user interviews
+
+Fullstack Dev — ships MVP, iterates weekly
+
+Designer — mobile-first UI + branding
+
+Growth Lead — content, partners, feedback loops
+
+Customer Success — onboarding, NPS, feature feedback
+
+Weekly sprint cadence, biweekly release.
+
+💬 Tagline Library (for marketing)
+
+“Stop chasing clients. Let them chase your calendar.”
+
+“Your schedule, your payments, your customers — not Thumbtack’s.”
+
+“The OS for cleaners and handymen who hate admin work.”
+
+“Binda turns texts into bookings — automatically.”
+
+🪪 License
+
+MIT License — Free for personal and commercial use.
+Attribution appreciated.
+
+Binda — built for the 6 million Americans who do the real work, not the desk work.
+
+
+---
+
+Would you like me to also generate the **`.env.example`** and a **`/docs/architecture.md`** to match this README (for your GitHub repo)? That would complete your MVP developer setup.
+#   u s e b i n d a  
+ 
