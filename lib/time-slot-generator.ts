@@ -28,56 +28,30 @@ export async function generateTimeSlots(
   date: Date,
   // timezone: string = 'America/New_York'
 ): Promise<TimeSlot[]> {
-  console.log('=== Time Slot Generation Debug ===');
-  console.log('Provider ID:', providerId);
-  console.log('Service ID:', serviceId);
-  console.log('Date:', date.toISOString());
-  console.log('Date local:', date.toLocaleDateString());
+  // Debug logging removed for performance
   
   // 1. Fetch provider's availability settings
   const settings = await getProviderAvailability(providerId);
-  console.log('Settings found:', !!settings);
   if (!settings) {
-    console.log('No settings found - returning empty array');
     return [];
   }
-  console.log('Settings:', {
-    timezone: settings.timezone,
-    working_hours: settings.working_hours,
-    default_buffer_minutes: settings.default_buffer_minutes,
-    min_advance_booking_hours: settings.min_advance_booking_hours,
-    max_advance_booking_days: settings.max_advance_booking_days
-  });
 
   // 2. Fetch service details
   const service = await getServiceDetails(serviceId);
-  console.log('Service found:', !!service);
   if (!service) {
-    console.log('No service found - returning empty array');
     return [];
   }
-  console.log('Service:', {
-    title: service.title,
-    duration: service.duration,
-    buffer_minutes: service.buffer_minutes
-  });
 
   // 3. Check if date is within booking window
   const isBookable = isDateBookable(date, settings);
-  console.log('Date is bookable:', isBookable);
   if (!isBookable) {
-    console.log('Date not bookable - returning empty array');
     return [];
   }
 
   // 4. Get day of week and check if provider works that day
   const dayName = getDayName(date);
   const dayHours = settings.working_hours[dayName];
-  console.log('Day name:', dayName);
-  console.log('Day hours:', dayHours);
-  
   if (!dayHours || !dayHours.enabled) {
-    console.log('Provider doesn\'t work on this day - returning empty array');
     return []; // Provider doesn't work on this day
   }
 
@@ -89,20 +63,7 @@ export async function generateTimeSlots(
 
   // 7. Determine buffer time (service-specific first, then fallback to default)
   const bufferMinutes = service.buffer_minutes || settings.default_buffer_minutes;
-  
-  console.log('About to generate slots with:', {
-    date: date.toISOString(),
-    dayHours,
-    breakTimes: settings.break_times || [],
-    serviceDuration: service.duration,
-    serviceBufferMinutes: service.buffer_minutes,
-    defaultBufferMinutes: settings.default_buffer_minutes,
-    finalBufferMinutes: bufferMinutes,
-    blockedPeriodsCount: blockedPeriods.length,
-    existingBookingsCount: existingBookings.length,
-    maxBookingsPerSlot: settings.max_bookings_per_slot
-  });
-  
+  // Generate time slots for the day
   const slots = generateSlotsForDay(
     date,
     dayHours,
@@ -115,9 +76,6 @@ export async function generateTimeSlots(
     settings.max_bookings_per_slot
   );
 
-  console.log('Generated slots count:', slots.length);
-  console.log('Available slots count:', slots.filter(s => s.available).length);
-  
   return slots;
 }
 
@@ -155,12 +113,7 @@ function generateSlotsForDay(
   const slotInterval = 15; // minutes
   const currentTime = new Date(dayStart);
 
-  console.log('Starting slot generation:', {
-    dayStart: dayStart.toISOString(),
-    dayEnd: dayEnd.toISOString(),
-    totalDuration,
-    slotInterval
-  });
+  // Generate slots at 15-minute intervals
 
   while (currentTime < dayEnd) {
     const slotStart = new Date(currentTime);
@@ -186,21 +139,11 @@ function generateSlotsForDay(
         end: slotEnd.toISOString(),
         available,
       });
-      
-      console.log('Generated slot:', {
-        start: slotStart.toISOString(),
-        end: slotEnd.toISOString(),
-        available
-      });
-    } else {
-      console.log('Skipping slot - would extend beyond working hours:', slotStart.toISOString());
     }
 
     // Move to next slot
     currentTime.setMinutes(currentTime.getMinutes() + slotInterval);
   }
-  
-  console.log('Finished slot generation. Total slots:', slots.length);
 
   return slots;
 }
@@ -221,30 +164,25 @@ function isSlotAvailable(
   // 1. Check if slot is in the past
   const now = new Date();
   if (slotStart <= now) {
-    console.log('Slot unavailable: in the past', slotStart.toISOString());
     return false;
   }
 
   // 2. Check if slot conflicts with break times
   if (isSlotDuringBreak(slotStart, slotEnd, serviceDuration, breakTimes, dayName)) {
-    console.log('Slot unavailable: conflicts with break time', slotStart.toISOString());
     return false;
   }
 
   // 3. Check if slot conflicts with blocked periods
   if (isSlotBlocked(slotStart, slotEnd, blockedPeriods)) {
-    console.log('Slot unavailable: conflicts with blocked period', slotStart.toISOString());
     return false;
   }
 
   // 4. Check capacity - count existing bookings at this time
   const bookingCount = countBookingsAtTime(slotStart, existingBookings);
   if (bookingCount >= maxBookingsPerSlot) {
-    console.log('Slot unavailable: at capacity', slotStart.toISOString(), 'bookings:', bookingCount);
     return false;
   }
 
-  console.log('Slot available:', slotStart.toISOString());
   return true;
 }
 
@@ -274,7 +212,6 @@ function isSlotDuringBreak(
       (slotStartTime >= breakTime.start && slotStartTime < breakTime.end) ||
       (slotEndTime > breakTime.start && slotEndTime <= breakTime.end)
     ) {
-      console.log('Slot conflicts with break time:', slotStartTime, '-', slotEndTime, 'vs break:', breakTime.start, '-', breakTime.end);
       return true; // Conflicts with break
     }
   }
@@ -335,17 +272,9 @@ function isDateBookable(date: Date, settings: AvailabilitySettings): boolean { /
   // TEMPORARY: Relax advance booking rules for testing
   // For now, allow booking any date that's not in the past
   if (date < now) {
-    console.log('Date is in the past');
     return false;
   }
   
-  console.log('Date booking check (relaxed for testing):', {
-    requestedDate: date.toISOString(),
-    now: now.toISOString(),
-    isInFuture: date >= now
-  });
-  
-  console.log('Date is bookable! (using relaxed rules)');
   return true;
   
   // Original logic (commented out for testing):

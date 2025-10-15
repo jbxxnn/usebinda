@@ -2,7 +2,7 @@
 
 import { notFound } from 'next/navigation';
 import { getUserByUsername, getServiceById } from '@/lib/database';
-import { BookingForm } from '@/components/booking/booking-form';
+import { BookingFormCalendar } from '@/components/booking/booking-form-calendar';
 import Link from 'next/link';
 
 interface PageProps {
@@ -46,7 +46,7 @@ export default async function BookServicePage({ params }: PageProps) {
 
       {/* Booking Form */}
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <BookingForm
+        <BookingFormCalendar
           service={service}
           provider={provider}
           providerUsername={username}

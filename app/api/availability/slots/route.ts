@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { generateTimeSlots, getAvailableDates } from '@/lib/time-slot-generator';
+import { hasAvailableSlots } from '@/lib/date-availability-checker';
 import type { ApiResponse } from '@/lib/types';
 
 /**
@@ -34,10 +35,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Mode: Get available dates
+    // Mode: Get available dates (FAST VERSION)
     if (mode === 'dates') {
       const daysAhead = parseInt(searchParams.get('daysAhead') || '30');
-      const availableDates = await getAvailableDates(providerId, serviceId, daysAhead);
+      const availableDates = await getAvailableDatesFast(providerId, serviceId, daysAhead);
       
       return NextResponse.json<ApiResponse>({
         success: true,
@@ -75,5 +76,41 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+/**
+ * Fast version of getAvailableDates that uses lightweight availability checking
+ */
+async function getAvailableDatesFast(
+  providerId: string,
+  serviceId: string,
+  daysAhead: number = 30
+): Promise<Date[]> {
+  const availableDates: Date[] = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Check each day for the next N days
+  const promises = [];
+  for (let i = 0; i < daysAhead; i++) {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    
+    // Create promise for each date check
+    promises.push(
+      hasAvailableSlots(providerId, serviceId, date).then(hasSlots => {
+        if (hasSlots) {
+          return date;
+        }
+        return null;
+      })
+    );
+  }
+
+  // Wait for all date checks to complete
+  const results = await Promise.all(promises);
+  
+  // Filter out null results (dates with no available slots)
+  return results.filter((date): date is Date => date !== null);
 }
 
