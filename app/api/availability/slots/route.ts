@@ -2,7 +2,9 @@
 // This endpoint is called by customers to see available booking times
 
 import { NextRequest, NextResponse } from 'next/server';
-import { generateTimeSlots, getAvailableDates } from '@/lib/time-slot-generator';
+import { generateTimeSlots, 
+  // getAvailableDates 
+  } from '@/lib/time-slot-generator';
 import { hasAvailableSlots } from '@/lib/date-availability-checker';
 import type { ApiResponse } from '@/lib/types';
 
@@ -86,7 +88,7 @@ async function getAvailableDatesFast(
   serviceId: string,
   daysAhead: number = 30
 ): Promise<Date[]> {
-  const availableDates: Date[] = [];
+  // const availableDates: Date[] = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 

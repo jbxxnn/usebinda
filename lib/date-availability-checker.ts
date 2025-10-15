@@ -71,7 +71,7 @@ function getWorkingHoursMinutes(dayHours: { start: string; end: string }): numbe
 /**
  * Check if a date is within the bookable window
  */
-function isDateBookable(date: Date, settings: AvailabilitySettings): boolean {
+function isDateBookable(date: Date, settings: AvailabilitySettings): boolean { // eslint-disable-line @typescript-eslint/no-unused-vars
   const now = new Date();
   
   // TEMPORARY: Relax advance booking rules for testing

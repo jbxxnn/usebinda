@@ -33,6 +33,29 @@ export function BlockedPeriodsManager() {
     block_type: 'manual',
   });
 
+  // Quick Day Block function
+  const setQuickDayBlock = () => {
+    if (newBlock.start_date) {
+      setNewBlock(prev => ({
+        ...prev,
+        start_time: '00:00', // 12:00 AM
+        end_time: '23:59',   // 11:59 PM
+        end_date: prev.start_date // Same day
+      }));
+    }
+  };
+
+  // Quick Multi-Day Block function
+  const setQuickMultiDayBlock = () => {
+    if (newBlock.start_date && newBlock.end_date) {
+      setNewBlock(prev => ({
+        ...prev,
+        start_time: '00:00', // 12:00 AM
+        end_time: '23:59',   // 11:59 PM
+      }));
+    }
+  };
+
   // Load blocked periods
   useEffect(() => {
     loadBlockedPeriods();
@@ -223,6 +246,35 @@ export function BlockedPeriodsManager() {
           </div>
         </div>
 
+        {/* Quick Block Buttons */}
+        <div className="mt-4 space-y-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button 
+              type="button"
+              variant="outline" 
+              size="sm"
+              onClick={setQuickDayBlock}
+              disabled={!newBlock.start_date}
+            >
+              ⚡ Single Day (12:00 AM - 11:59 PM)
+            </Button>
+            
+            <Button 
+              type="button"
+              variant="outline" 
+              size="sm"
+              onClick={setQuickMultiDayBlock}
+              disabled={!newBlock.start_date || !newBlock.end_date}
+            >
+              📅 Date Range (12:00 AM - 11:59 PM)
+            </Button>
+          </div>
+          
+          <p className="text-xs text-muted-foreground">
+            Quick buttons automatically set times to block entire days (12:00 AM - 11:59 PM)
+          </p>
+        </div>
+
         <div className="mt-4">
           <Label htmlFor="block-title">Title *</Label>
           <Input
@@ -273,6 +325,15 @@ export function BlockedPeriodsManager() {
       {/* Help Text */}
       <div className="text-sm text-muted-foreground">
         <p>
+          <strong>Quick Tips:</strong>
+        </p>
+        <ul className="list-disc list-inside mt-1 space-y-1">
+          <li>Use the quick buttons to automatically set full-day blocks (12:00 AM - 11:59 PM)</li>
+          <li>For single day: Select start date, click "Single Day" button</li>
+          <li>For date ranges: Select both dates, click "Date Range" button</li>
+        </ul>
+        
+        <p className="mt-3">
           <strong>Common blocked periods:</strong>
         </p>
         <ul className="list-disc list-inside mt-1 space-y-1">

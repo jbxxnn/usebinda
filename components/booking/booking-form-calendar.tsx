@@ -71,7 +71,7 @@ export function BookingFormCalendar({ service, provider, providerUsername }: Boo
 
       if (blockedResponse.ok) {
         const blockedData = await blockedResponse.json();
-        const blocked = blockedData.data?.map((block: any) => ({
+        const blocked = blockedData.data?.map((block: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
           start: new Date(block.start_time),
           end: new Date(block.end_time),
           title: block.title,
@@ -80,7 +80,7 @@ export function BookingFormCalendar({ service, provider, providerUsername }: Boo
         
         // Convert blocked periods to dates
         const blockedDateSet = new Set<string>();
-        blocked.forEach((block: any) => {
+        blocked.forEach((block: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
           const startDate = new Date(block.start);
           const endDate = new Date(block.end);
           
