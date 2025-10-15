@@ -47,13 +47,26 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const user = data?.claims;
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  // List of public paths that don't require authentication
+  const publicPaths = [
+    "/",
+    "/auth",
+    "/api/bookings",
+    "/api/availability",
+  ];
+
+  const isPublicPath = publicPaths.some(path => 
+    request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(path)
+  );
+
+  // Check if this is a public booking page (dynamic username route)
+  // Pattern: /[username] or /[username]/book/...
+  const pathSegments = request.nextUrl.pathname.split('/').filter(Boolean);
+  const isPublicBookingPage = pathSegments.length > 0 && 
+    !['dashboard', 'auth', 'api', '_next'].includes(pathSegments[0]);
+
+  if (!user && !isPublicPath && !isPublicBookingPage) {
+    // no user, redirect to login page
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);

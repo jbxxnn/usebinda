@@ -9,8 +9,8 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  title: "Binda - The Solo Home-Service Operator's OS",
+  description: "Get booked, get paid, get rebooked — all from your phone. Built for independent home-service professionals in the United States.",
 };
 
 const geistSans = Geist({
