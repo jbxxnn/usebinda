@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
     const serviceId = searchParams.get('serviceId');
     const dateStr = searchParams.get('date');
     const mode = searchParams.get('mode') || 'slots';
+    const customerTimezone = searchParams.get('timezone'); // Customer's timezone
 
     // Validate required parameters
     if (!providerId || !serviceId) {
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Generate time slots
-    const slots = await generateTimeSlots(providerId, serviceId, date);
+    const slots = await generateTimeSlots(providerId, serviceId, date, customerTimezone || undefined);
 
     return NextResponse.json<ApiResponse>({
       success: true,

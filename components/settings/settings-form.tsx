@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import { TimezoneSelector } from '@/components/ui/timezone-selector';
 import { sanitizeUsername } from '@/lib/validation';
 
 interface SettingsFormProps {
@@ -154,24 +155,12 @@ export function SettingsForm({ profile }: SettingsFormProps) {
           </div>
         )}
 
-        <div className="space-y-2">
-          <Label htmlFor="timezone">Timezone</Label>
-          <select
-            aria-label="Timezone"
-            id="timezone"
-            value={formData.timezone}
-            onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
-            className="w-full px-3 py-2 border border-input rounded-md bg-background"
-          >
-            <option value="America/New_York">Eastern Time (ET)</option>
-            <option value="America/Chicago">Central Time (CT)</option>
-            <option value="America/Denver">Mountain Time (MT)</option>
-            <option value="America/Los_Angeles">Pacific Time (PT)</option>
-            <option value="America/Phoenix">Arizona Time (MST)</option>
-            <option value="America/Anchorage">Alaska Time (AKT)</option>
-            <option value="Pacific/Honolulu">Hawaii Time (HST)</option>
-          </select>
-        </div>
+        <TimezoneSelector
+          value={formData.timezone}
+          onChange={(timezone) => setFormData({ ...formData, timezone })}
+          label="Timezone"
+          required
+        />
 
         <Button type="submit" disabled={isLoading}>
           {isLoading ? 'Saving...' : 'Save Changes'}

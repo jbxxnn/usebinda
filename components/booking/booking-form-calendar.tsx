@@ -14,6 +14,7 @@ import { formatAmount } from '@/lib/stripe';
 import { formatDate, formatTime } from '@/lib/scheduling';
 import { validateBookingData } from '@/lib/validation';
 import { addDays, isSameDay, isToday, isPast } from 'date-fns';
+import { detectUserTimezone, formatTimeInTimezone } from '@/lib/timezone';
 
 interface BookingFormCalendarProps {
   service: Service;
@@ -26,6 +27,7 @@ export function BookingFormCalendar({ service, provider, providerUsername }: Boo
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState<'details' | 'datetime' | 'confirm'>('details');
+  const [customerTimezone] = useState(() => detectUserTimezone());
 
   const [formData, setFormData] = useState({
     customer_name: '',
@@ -59,7 +61,7 @@ export function BookingFormCalendar({ service, provider, providerUsername }: Boo
     try {
       // Load available dates and blocked periods in parallel
       const [datesResponse, blockedResponse] = await Promise.all([
-        fetch(`/api/availability/slots?providerId=${provider.id}&serviceId=${service.id}&mode=dates&daysAhead=60`),
+        fetch(`/api/availability/slots?providerId=${provider.id}&serviceId=${service.id}&mode=dates&daysAhead=60&timezone=${customerTimezone}`),
         fetch(`/api/availability/blocked-periods?startDate=${new Date().toISOString()}&endDate=${addDays(new Date(), 60).toISOString()}`)
       ]);
       
@@ -104,7 +106,7 @@ export function BookingFormCalendar({ service, provider, providerUsername }: Boo
     setLoadingSlots(true);
     try {
       const response = await fetch(
-        `/api/availability/slots?providerId=${provider.id}&serviceId=${service.id}&date=${date.toISOString()}`
+        `/api/availability/slots?providerId=${provider.id}&serviceId=${service.id}&date=${date.toISOString()}&timezone=${customerTimezone}`
       );
       
       if (response.ok) {
@@ -358,9 +360,9 @@ export function BookingFormCalendar({ service, provider, providerUsername }: Boo
                         onClick={() => handleDateTimeSelect(slot.start)}
                         className="h-auto p-3 flex flex-col items-center"
                       >
-                        <span className="font-medium">{formatTime(slot.start)}</span>
+                        <span className="font-medium">{formatTimeInTimezone(slot.start, customerTimezone)}</span>
                         <span className="text-xs text-muted-foreground">
-                          {formatTime(slot.end)}
+                          {formatTimeInTimezone(slot.end, customerTimezone)}
                         </span>
                       </Button>
                     ))}
@@ -402,7 +404,7 @@ export function BookingFormCalendar({ service, provider, providerUsername }: Boo
                   <div><strong>Service:</strong> {service.title}</div>
                   <div><strong>Duration:</strong> {service.duration} minutes</div>
                   <div><strong>Date:</strong> {formatDate(startTime)}</div>
-                  <div><strong>Time:</strong> {formatTime(startTime)} - {formatTime(endTime)}</div>
+                  <div><strong>Time:</strong> {formatTimeInTimezone(startTime, customerTimezone)} - {formatTimeInTimezone(endTime, customerTimezone)}</div>
                   <div><strong>Price:</strong> {formatAmount(service.price)}</div>
                 </div>
               </div>

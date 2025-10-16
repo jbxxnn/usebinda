@@ -10,6 +10,13 @@ import type {
   BreakTime,
 } from './types';
 import { createAdminClient } from './supabase/admin';
+import { 
+  convertToUTC, 
+  convertFromUTC, 
+  parseTimeInTimezone,
+  formatTimeInTimezone,
+  getCurrentTimeInTimezone
+} from './timezone';
 
 /**
  * Generate available time slots for a specific date
@@ -26,7 +33,7 @@ export async function generateTimeSlots(
   providerId: string,
   serviceId: string,
   date: Date,
-  // timezone: string = 'America/New_York'
+  customerTimezone?: string
 ): Promise<TimeSlot[]> {
   // Debug logging removed for performance
   
@@ -73,7 +80,8 @@ export async function generateTimeSlots(
     settings.timezone,
     blockedPeriods,
     existingBookings,
-    settings.max_bookings_per_slot
+    settings.max_bookings_per_slot,
+    customerTimezone
   );
 
   return slots;
@@ -88,44 +96,52 @@ function generateSlotsForDay(
   breakTimes: BreakTime[],
   service: Service,
   bufferMinutes: number,
-  timezone: string,
+  providerTimezone: string,
   blockedPeriods: BlockedPeriod[],
   existingBookings: Array<{ date_time: string; service_id: string }>,
-  maxBookingsPerSlot: number
+  maxBookingsPerSlot: number,
+  customerTimezone?: string
 ): TimeSlot[] {
   const slots: TimeSlot[] = [];
   
-  // Parse working hours
+  // Parse working hours in provider's timezone
   const [startHour, startMinute] = workingHours.start.split(':').map(Number);
   const [endHour, endMinute] = workingHours.end.split(':').map(Number);
 
-  // Create start and end times for the day
+  // Create start and end times for the day in provider's timezone
   const dayStart = new Date(date);
   dayStart.setHours(startHour, startMinute, 0, 0);
   
   const dayEnd = new Date(date);
   dayEnd.setHours(endHour, endMinute, 0, 0);
 
+  // Convert provider's local times to UTC for storage
+  const dayStartUTC = convertToUTC(dayStart, providerTimezone);
+  const dayEndUTC = convertToUTC(dayEnd, providerTimezone);
+
   // Total time needed for a booking (service duration + buffer)
   const totalDuration = service.duration + bufferMinutes;
 
   // Generate slots at 15-minute intervals (configurable)
   const slotInterval = 15; // minutes
-  const currentTime = new Date(dayStart);
+  let currentTime = new Date(dayStart);
 
   // Generate slots at 15-minute intervals
-
   while (currentTime < dayEnd) {
     const slotStart = new Date(currentTime);
     const slotEnd = new Date(currentTime);
     slotEnd.setMinutes(slotEnd.getMinutes() + totalDuration);
 
+    // Convert slot times to UTC for storage and comparison
+    const slotStartUTC = convertToUTC(slotStart, providerTimezone);
+    const slotEndUTC = convertToUTC(slotEnd, providerTimezone);
+
     // Check if slot end is within working hours
     if (slotEnd <= dayEnd) {
-      // Check availability
+      // Check availability using UTC times
       const available = isSlotAvailable(
-        slotStart,
-        slotEnd,
+        slotStartUTC,
+        slotEndUTC,
         service.duration,
         breakTimes,
         blockedPeriods,
@@ -134,9 +150,13 @@ function generateSlotsForDay(
         getDayName(date)
       );
 
+      // Store slots in UTC, but display times based on customer timezone if provided
+      const displayStart = customerTimezone ? slotStartUTC : slotStartUTC;
+      const displayEnd = customerTimezone ? slotEndUTC : slotEndUTC;
+
       slots.push({
-        start: slotStart.toISOString(),
-        end: slotEnd.toISOString(),
+        start: displayStart.toISOString(),
+        end: displayEnd.toISOString(),
         available,
       });
     }
