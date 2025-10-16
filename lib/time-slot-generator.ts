@@ -12,10 +12,10 @@ import type {
 import { createAdminClient } from './supabase/admin';
 import { 
   convertToUTC, 
-  convertFromUTC, 
-  parseTimeInTimezone,
-  formatTimeInTimezone,
-  getCurrentTimeInTimezone
+  // convertFromUTC, 
+  // parseTimeInTimezone,
+  // formatTimeInTimezone,
+  // getCurrentTimeInTimezone
 } from './timezone';
 
 /**
@@ -116,15 +116,15 @@ function generateSlotsForDay(
   dayEnd.setHours(endHour, endMinute, 0, 0);
 
   // Convert provider's local times to UTC for storage
-  const dayStartUTC = convertToUTC(dayStart, providerTimezone);
-  const dayEndUTC = convertToUTC(dayEnd, providerTimezone);
+  // const dayStartUTC = convertToUTC(dayStart, providerTimezone);
+  // const dayEndUTC = convertToUTC(dayEnd, providerTimezone);
 
   // Total time needed for a booking (service duration + buffer)
   const totalDuration = service.duration + bufferMinutes;
 
   // Generate slots at 15-minute intervals (configurable)
   const slotInterval = 15; // minutes
-  let currentTime = new Date(dayStart);
+  const currentTime = new Date(dayStart);
 
   // Generate slots at 15-minute intervals
   while (currentTime < dayEnd) {

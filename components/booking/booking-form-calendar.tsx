@@ -11,7 +11,9 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { formatAmount } from '@/lib/stripe';
-import { formatDate, formatTime } from '@/lib/scheduling';
+import { formatDate, 
+  // formatTime 
+} from '@/lib/scheduling';
 import { validateBookingData } from '@/lib/validation';
 import { addDays, isSameDay, isToday, isPast } from 'date-fns';
 import { detectUserTimezone, formatTimeInTimezone } from '@/lib/timezone';
