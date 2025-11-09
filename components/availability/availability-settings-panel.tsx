@@ -2,10 +2,11 @@
 
 // Availability settings panel component
 
-import type { AvailabilitySettings } from '@/lib/types';
+import type { AvailabilitySettings, CalendarConflictAction } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 
 interface AvailabilitySettingsPanelProps {
   settings: AvailabilitySettings;
@@ -113,6 +114,63 @@ export function AvailabilitySettingsPanel({ settings, onChange }: AvailabilitySe
         <p className="text-sm text-muted-foreground mt-1">
           How many customers can book the same time slot (useful for group services)
         </p>
+      </div>
+
+      {/* Calendar Sync Settings */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Calendar Sync Settings</h3>
+        
+        <div className="flex items-center justify-between">
+          <div>
+            <Label htmlFor="calendar-sync">Enable Calendar Sync</Label>
+            <p className="text-sm text-muted-foreground">
+              Automatically sync with external calendars to block existing appointments
+            </p>
+          </div>
+          <Switch
+            id="calendar-sync"
+            checked={settings.calendar_sync_enabled}
+            onCheckedChange={(enabled) => onChange({ calendar_sync_enabled: enabled })}
+          />
+        </div>
+
+        {settings.calendar_sync_enabled && (
+          <>
+            <div>
+              <Label htmlFor="sync-frequency">Sync Frequency (minutes)</Label>
+              <Input
+                id="sync-frequency"
+                type="number"
+                min="5"
+                max="1440"
+                value={settings.calendar_sync_frequency_minutes}
+                onChange={(e) => onChange({ calendar_sync_frequency_minutes: parseInt(e.target.value) || 15 })}
+                className="mt-1"
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                How often to check for calendar changes (minimum 5 minutes)
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="conflict-action">Calendar Conflict Action</Label>
+              <select
+                aria-label="Calendar Conflict Action"
+                id="conflict-action"
+                value={settings.calendar_conflict_action}
+                onChange={(e) => onChange({ calendar_conflict_action: e.target.value as CalendarConflictAction })}
+                className="w-full mt-1 px-3 py-2 border border-input rounded-md bg-background"
+              >
+                <option value="block">Block conflicting time slots</option>
+                <option value="warn">Show warning but allow booking</option>
+                <option value="ignore">Ignore calendar conflicts</option>
+              </select>
+              <p className="text-sm text-muted-foreground mt-1">
+                What to do when there&apos;s a calendar conflict
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Preview */}

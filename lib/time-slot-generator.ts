@@ -17,6 +17,7 @@ import {
   // formatTimeInTimezone,
   // getCurrentTimeInTimezone
 } from './timezone';
+import { CalendarSyncManager } from './calendar/calendar-sync-manager';
 
 /**
  * Generate available time slots for a specific date
@@ -68,7 +69,22 @@ export async function generateTimeSlots(
   // 6. Fetch existing bookings for this date
   const existingBookings = await getBookingsForDate(providerId, date);
 
-  // 7. Determine buffer time (service-specific first, then fallback to default)
+  // 7. Fetch calendar conflicts if calendar sync is enabled
+  let calendarConflicts: Array<{ start_time: string; end_time: string }> = [];
+  if (settings.calendar_sync_enabled && settings.calendar_conflict_action === 'block') {
+    try {
+      const conflicts = await CalendarSyncManager.getCalendarConflicts(providerId, date, new Date(date.getTime() + 24 * 60 * 60 * 1000));
+      calendarConflicts = conflicts.map(conflict => ({
+        start_time: conflict.start_time,
+        end_time: conflict.end_time,
+      }));
+    } catch (error) {
+      console.error('Error fetching calendar conflicts:', error);
+      // Continue without calendar conflicts if there's an error
+    }
+  }
+
+  // 8. Determine buffer time (service-specific first, then fallback to default)
   const bufferMinutes = service.buffer_minutes || settings.default_buffer_minutes;
   // Generate time slots for the day
   const slots = generateSlotsForDay(
@@ -81,7 +97,8 @@ export async function generateTimeSlots(
     blockedPeriods,
     existingBookings,
     settings.max_bookings_per_slot,
-    customerTimezone
+    customerTimezone,
+    calendarConflicts
   );
 
   return slots;
@@ -100,7 +117,8 @@ function generateSlotsForDay(
   blockedPeriods: BlockedPeriod[],
   existingBookings: Array<{ date_time: string; service_id: string }>,
   maxBookingsPerSlot: number,
-  customerTimezone?: string
+  customerTimezone?: string,
+  calendarConflicts?: Array<{ start_time: string; end_time: string }>
 ): TimeSlot[] {
   const slots: TimeSlot[] = [];
   
@@ -147,7 +165,8 @@ function generateSlotsForDay(
         blockedPeriods,
         existingBookings,
         maxBookingsPerSlot,
-        getDayName(date)
+        getDayName(date),
+        calendarConflicts
       );
 
       // Store slots in UTC, but display times based on customer timezone if provided
@@ -179,7 +198,8 @@ function isSlotAvailable(
   blockedPeriods: BlockedPeriod[],
   existingBookings: Array<{ date_time: string; service_id: string }>,
   maxBookingsPerSlot: number,
-  dayName: string
+  dayName: string,
+  calendarConflicts?: Array<{ start_time: string; end_time: string }>
 ): boolean {
   // 1. Check if slot is in the past
   const now = new Date();
@@ -203,7 +223,32 @@ function isSlotAvailable(
     return false;
   }
 
+  // 5. Check calendar conflicts
+  if (calendarConflicts && isSlotConflictingWithCalendar(slotStart, slotEnd, calendarConflicts)) {
+    return false;
+  }
+
   return true;
+}
+
+/**
+ * Check if slot conflicts with any calendar events
+ */
+function isSlotConflictingWithCalendar(
+  slotStart: Date,
+  slotEnd: Date,
+  calendarConflicts: Array<{ start_time: string; end_time: string }>
+): boolean {
+  for (const conflict of calendarConflicts) {
+    const conflictStart = new Date(conflict.start_time);
+    const conflictEnd = new Date(conflict.end_time);
+    
+    // Check for any overlap between slot and calendar event
+    if (slotStart < conflictEnd && slotEnd > conflictStart) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**

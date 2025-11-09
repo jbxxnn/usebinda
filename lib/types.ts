@@ -10,6 +10,12 @@ export type MessageType = 'confirmation' | 'reminder_24h' | 'reminder_2h' | 'on_
 
 export type MessageChannel = 'sms' | 'email';
 
+export type CalendarProvider = 'google' | 'outlook' | 'apple';
+
+export type CalendarConflictAction = 'block' | 'warn' | 'ignore';
+
+export type EventStatus = 'confirmed' | 'cancelled' | 'tentative';
+
 export interface User {
   id: string;
   name: string;
@@ -111,6 +117,9 @@ export interface AvailabilitySettings {
   cancellation_policy: CancellationPolicy;
   rescheduling_policy: ReschedulingPolicy;
   notification_preferences: NotificationPreferences;
+  calendar_sync_enabled: boolean;
+  calendar_sync_frequency_minutes: number;
+  calendar_conflict_action: CalendarConflictAction;
   created_at: string;
   updated_at: string;
 }
@@ -219,5 +228,51 @@ export interface AvailabilityConfig {
   start_hour: number; // 0-23
   end_hour: number; // 0-23
   days_ahead: number; // How many days to show
+}
+
+// Calendar Integration Types
+export interface CalendarIntegration {
+  id: string;
+  user_id: string;
+  provider: CalendarProvider;
+  calendar_id: string;
+  calendar_name: string;
+  access_token: string; // Encrypted
+  refresh_token?: string; // Encrypted
+  token_expires_at?: string;
+  sync_enabled: boolean;
+  sync_frequency_minutes: number;
+  last_sync_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CalendarEvent {
+  id: string;
+  integration_id: string;
+  external_event_id: string;
+  title: string;
+  description?: string;
+  start_time: string;
+  end_time: string;
+  all_day: boolean;
+  location?: string;
+  attendees?: Array<{
+    email: string;
+    name?: string;
+    response_status?: 'accepted' | 'declined' | 'tentative' | 'needsAction';
+  }>;
+  recurrence_rule?: string;
+  status: EventStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OAuthTokenResponse {
+  access_token: string;
+  refresh_token?: string;
+  expires_in?: number;
+  scope?: string;
+  token_type?: string;
 }
 
