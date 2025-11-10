@@ -51,6 +51,9 @@ export default async function AvailabilityPage() {
         notify_provider_on_cancellation: true,
         notify_provider_on_reschedule: true,
       },
+      calendar_sync_enabled: false,
+      calendar_sync_frequency_minutes: 15,
+      calendar_conflict_action: 'warn',
       created_at: '',
       updated_at: '',
     };
