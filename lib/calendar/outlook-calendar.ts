@@ -1,7 +1,61 @@
 // Microsoft Outlook Calendar integration service
 
 import { ConfidentialClientApplication } from '@azure/msal-node';
+import type { AuthenticationResult } from '@azure/msal-node';
 import type { CalendarEvent, OAuthTokenResponse } from '@/lib/types';
+
+interface MicrosoftGraphCalendar {
+  id: string;
+  name?: string;
+  description?: string | null;
+  isDefaultCalendar?: boolean;
+  canEdit?: boolean;
+}
+
+interface MicrosoftGraphEvent {
+  id?: string;
+  subject?: string | null;
+  body?: {
+    content?: string | null;
+  } | null;
+  start?: {
+    dateTime?: string | null;
+    date?: string | null;
+  } | null;
+  end?: {
+    dateTime?: string | null;
+    date?: string | null;
+  } | null;
+  location?: {
+    displayName?: string | null;
+  } | null;
+  attendees?: Array<{
+    emailAddress?: {
+      address?: string | null;
+      name?: string | null;
+    } | null;
+    status?: {
+      response?: string | null;
+    } | null;
+  }> | null;
+  recurrence?: {
+    pattern?: {
+      type?: string | null;
+    } | null;
+  } | null;
+  isCancelled?: boolean | null;
+}
+
+type OutlookAttendeeResponseStatus =
+  | 'accepted'
+  | 'declined'
+  | 'tentativelyAccepted'
+  | 'notResponded'
+  | string
+  | null
+  | undefined;
+
+type CalendarEventAttendeeResponseStatus = NonNullable<CalendarEvent['attendees']>[number]['response_status'];
 
 export class OutlookCalendarService {
   private msalInstance: ConfidentialClientApplication;
@@ -24,7 +78,7 @@ export class OutlookCalendarService {
   /**
    * Get OAuth authorization URL
    */
-  static getAuthUrl(): string {
+  static async getAuthUrl(): Promise<string> {
     const msalInstance = new ConfidentialClientApplication({
       auth: {
         clientId: process.env.OUTLOOK_CLIENT_ID!,
@@ -38,9 +92,9 @@ export class OutlookCalendarService {
       'https://graph.microsoft.com/calendars.readwrite',
     ];
 
-    return msalInstance.getAuthCodeUrl({
+    return await msalInstance.getAuthCodeUrl({
       scopes,
-      redirectUri: process.env.OUTLOOK_REDIRECT_URI,
+      redirectUri: process.env.OUTLOOK_REDIRECT_URI!,
     });
   }
 
@@ -62,12 +116,18 @@ export class OutlookCalendarService {
         'https://graph.microsoft.com/calendars.read',
         'https://graph.microsoft.com/calendars.readwrite',
       ],
-      redirectUri: process.env.OUTLOOK_REDIRECT_URI,
+      redirectUri: process.env.OUTLOOK_REDIRECT_URI!,
     });
+
+    if (!tokenResponse) {
+      throw new Error('Failed to acquire Outlook tokens');
+    }
+
+    const refreshToken = OutlookCalendarService.extractRefreshToken(tokenResponse);
 
     return {
       access_token: tokenResponse.accessToken,
-      refresh_token: tokenResponse.refreshToken,
+      refresh_token: refreshToken,
       expires_in: tokenResponse.expiresOn ? Math.floor((tokenResponse.expiresOn.getTime() - Date.now()) / 1000) : undefined,
       scope: tokenResponse.scopes?.join(' '),
       token_type: 'Bearer',
@@ -91,13 +151,21 @@ export class OutlookCalendarService {
       }
 
       const data = await response.json();
-      return data.value?.map((calendar: any) => ({
-        id: calendar.id,
-        name: calendar.name,
-        description: calendar.description,
-        primary: calendar.isDefaultCalendar,
-        accessRole: calendar.canEdit ? 'owner' : 'reader',
-      })) || [];
+      return (data.value ?? [])
+        .filter((calendarEntry: unknown): calendarEntry is MicrosoftGraphCalendar => {
+          return (
+            typeof calendarEntry === 'object' &&
+            calendarEntry !== null &&
+            typeof (calendarEntry as MicrosoftGraphCalendar).id === 'string'
+          );
+        })
+        .map((calendarEntry: MicrosoftGraphCalendar) => ({
+          id: calendarEntry.id,
+          name: calendarEntry.name ?? 'Untitled Calendar',
+          description: calendarEntry.description ?? undefined,
+          primary: Boolean(calendarEntry.isDefaultCalendar),
+          accessRole: calendarEntry.canEdit ? 'owner' : 'reader',
+        }));
     } catch (error) {
       console.error('Error fetching calendars:', error);
       throw new Error('Failed to fetch calendars');
@@ -131,7 +199,12 @@ export class OutlookCalendarService {
       }
 
       const data = await response.json();
-      return data.value?.map((event: any) => this.mapOutlookEventToCalendarEvent(event, calendarId)) || [];
+
+      return (data.value ?? [])
+        .filter((eventEntry: unknown): eventEntry is MicrosoftGraphEvent => {
+          return typeof eventEntry === 'object' && eventEntry !== null;
+        })
+        .map((eventEntry: MicrosoftGraphEvent) => this.mapOutlookEventToCalendarEvent(eventEntry));
     } catch (error) {
       console.error('Error fetching events:', error);
       throw new Error('Failed to fetch calendar events');
@@ -211,7 +284,7 @@ export class OutlookCalendarService {
     location?: string;
   }) {
     try {
-      const updateData: any = {};
+      const updateData: Record<string, unknown> = {};
       
       if (eventData.title) updateData.subject = eventData.title;
       if (eventData.description) {
@@ -305,14 +378,19 @@ export class OutlookCalendarService {
         ],
       });
 
+      if (!tokenResponse) {
+        return null;
+      }
+
       this.accessToken = tokenResponse.accessToken;
-      if (tokenResponse.refreshToken) {
-        this.refreshToken = tokenResponse.refreshToken;
+      const refreshToken = OutlookCalendarService.extractRefreshToken(tokenResponse);
+      if (refreshToken) {
+        this.refreshToken = refreshToken;
       }
 
       return {
         access_token: tokenResponse.accessToken,
-        refresh_token: tokenResponse.refreshToken,
+        refresh_token: refreshToken,
       };
     } catch (error) {
       console.error('Error refreshing token:', error);
@@ -321,34 +399,73 @@ export class OutlookCalendarService {
   }
 
   /**
+   * Safely extract the refresh token from MSAL authentication results
+   */
+  private static extractRefreshToken(result: AuthenticationResult | null): string | undefined {
+    if (!result) {
+      return undefined;
+    }
+
+    const candidate = (result as AuthenticationResult & { refreshToken?: string | null }).refreshToken;
+    return candidate ?? undefined;
+  }
+
+  /**
    * Map Outlook Calendar event to our CalendarEvent format
    */
-  private mapOutlookEventToCalendarEvent(outlookEvent: any, calendarId: string): CalendarEvent {
-    const start = outlookEvent.start?.dateTime || outlookEvent.start?.date;
-    const end = outlookEvent.end?.dateTime || outlookEvent.end?.date;
-    
+  private mapOutlookEventToCalendarEvent(outlookEvent: MicrosoftGraphEvent): CalendarEvent {
+    const start = outlookEvent.start?.dateTime ?? outlookEvent.start?.date;
+    const end = outlookEvent.end?.dateTime ?? outlookEvent.end?.date;
+
+    if (!outlookEvent.id || !start || !end) {
+      throw new Error('Invalid Outlook event payload');
+    }
+
+    const attendees = (outlookEvent.attendees ?? [])
+      .filter((attendee): attendee is NonNullable<MicrosoftGraphEvent['attendees']>[number] => {
+        return Boolean(attendee?.emailAddress?.address);
+      })
+      .map((attendee) => ({
+        email: attendee.emailAddress?.address as string,
+        name: attendee.emailAddress?.name ?? undefined,
+        response_status: this.mapOutlookResponseStatus(attendee.status?.response),
+      }))
+      .filter((attendee) => attendee.email);
+
     return {
       id: '', // Will be set when saving to database
       integration_id: '', // Will be set when saving to database
       external_event_id: outlookEvent.id,
       title: outlookEvent.subject || 'Untitled Event',
-      description: outlookEvent.body?.content,
+      description: outlookEvent.body?.content ?? undefined,
       start_time: new Date(start).toISOString(),
       end_time: new Date(end).toISOString(),
       all_day: !outlookEvent.start?.dateTime,
-      location: outlookEvent.location?.displayName,
-      attendees: outlookEvent.attendees?.map((attendee: any) => ({
-        email: attendee.emailAddress.address,
-        name: attendee.emailAddress.name,
-        response_status: attendee.status?.response === 'accepted' ? 'accepted' :
-                        attendee.status?.response === 'declined' ? 'declined' :
-                        attendee.status?.response === 'tentative' ? 'tentative' : 'needsAction',
-      })),
-      recurrence_rule: outlookEvent.recurrence?.pattern?.type,
+      location: outlookEvent.location?.displayName ?? undefined,
+      attendees: attendees.length > 0 ? attendees : undefined,
+      recurrence_rule: outlookEvent.recurrence?.pattern?.type ?? undefined,
       status: outlookEvent.isCancelled ? 'cancelled' : 'confirmed',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
+  }
+
+  private mapOutlookResponseStatus(
+    status: OutlookAttendeeResponseStatus
+  ): CalendarEventAttendeeResponseStatus | undefined {
+    switch (status) {
+      case 'accepted':
+      case 'declined':
+      case 'tentativelyAccepted':
+      case 'notResponded':
+        return status === 'tentativelyAccepted'
+          ? 'tentative'
+          : status === 'notResponded'
+            ? 'needsAction'
+            : status;
+      default:
+        return undefined;
+    }
   }
 }
 

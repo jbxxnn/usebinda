@@ -3,7 +3,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { GoogleCalendarService } from './google-calendar';
 import { OutlookCalendarService } from './outlook-calendar';
-import type { CalendarIntegration, CalendarEvent, CalendarProvider } from '@/lib/types';
+import type { CalendarIntegration, CalendarEvent } from '@/lib/types';
 
 export class CalendarSyncManager {
   /**
@@ -129,8 +129,8 @@ export class CalendarSyncManager {
       );
 
       // Process new/updated events
-      const eventsToInsert: any[] = [];
-      const eventsToUpdate: any[] = [];
+      const eventsToInsert: CalendarEvent[] = [];
+      const eventsToUpdate: CalendarEvent[] = [];
 
       for (const event of externalEvents) {
         const isExisting = existingEventIds.has(event.external_event_id);
@@ -151,11 +151,16 @@ export class CalendarSyncManager {
         };
 
         if (isExisting) {
-          eventsToUpdate.push(eventData);
+          eventsToUpdate.push({
+            ...eventData,
+            created_at: new Date().toISOString(),
+            id: event.id,
+          });
         } else {
           eventsToInsert.push({
             ...eventData,
             created_at: new Date().toISOString(),
+            id: event.id,
           });
         }
       }

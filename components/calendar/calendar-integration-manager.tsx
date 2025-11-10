@@ -10,11 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
-interface CalendarIntegrationManagerProps {
-  userId: string;
-}
-
-export function CalendarIntegrationManager({ userId }: CalendarIntegrationManagerProps) {
+export function CalendarIntegrationManager() {
   const [integrations, setIntegrations] = useState<CalendarIntegration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -275,7 +271,7 @@ export function CalendarIntegrationManager({ userId }: CalendarIntegrationManage
         </p>
         <ul className="list-disc list-inside mt-1 space-y-1">
           <li>Connect your Google Calendar or Outlook to automatically block time slots</li>
-          <li>When you have existing appointments, those times won't be available for booking</li>
+          <li>When you have existing appointments, those times won&apos;t be available for booking</li>
           <li>Calendar sync happens automatically every 15 minutes</li>
           <li>You can manually sync or disable sync for any connected calendar</li>
           <li>New bookings will be automatically added to your connected calendars</li>

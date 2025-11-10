@@ -1,6 +1,7 @@
 // API route for calendar integrations
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { GoogleCalendarService } from '@/lib/calendar/google-calendar';
 import { OutlookCalendarService } from '@/lib/calendar/outlook-calendar';
@@ -10,7 +11,7 @@ import type { ApiResponse, CalendarProvider } from '@/lib/types';
  * GET /api/calendar/integrations
  * Get all calendar integrations for the authenticated user
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
 
     // Verify the calendar exists and user has access
     const calendars = await calendarService.getCalendars();
-    const targetCalendar = calendars.find(cal => cal.id === calendar_id);
+    const targetCalendar = calendars.find((cal: { id: string }) => cal.id === calendar_id);
 
     if (!targetCalendar) {
       return NextResponse.json<ApiResponse>(
